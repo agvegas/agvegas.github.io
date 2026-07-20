@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Permiso B — DGT</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+header {
+  width: 100%;
+  background: #1e293b;
+  border-bottom: 3px solid #f59e0b;
+  padding: 16px 20px;
+  text-align: center;
+}
+header h1 { font-size: 1.4rem; font-weight: 700; color: #f59e0b; }
+header p { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  padding: 20px;
+  flex: 1;
+}
+
+/* Start screen */
+.start-screen { text-align: center; padding: 40px 0; }
+.start-screen h2 { font-size: 1.6rem; margin-bottom: 12px; }
+.start-screen p { color: #94a3b8; margin-bottom: 24px; line-height: 1.5; }
+.start-screen .info-cards { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px; }
+.info-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 16px 20px;
+  min-width: 120px;
+}
+.info-card .num { font-size: 1.8rem; font-weight: 700; color: #f59e0b; }
+.info-card .label { font-size: 0.75rem; color: #94a3b8; margin-top: 4px; }
+
+.btn {
+  background: #f59e0b;
+  color: #0f172a;
+  border: none;
+  padding: 14px 36px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn:hover { background: #d97706; transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-outline {
+  background: transparent;
+  border: 2px solid #f59e0b;
+  color: #f59e0b;
+}
+.btn-outline:hover { background: #f59e0b20; }
+
+/* Progress bar */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #334155;
+  border-radius: 3px;
+  margin-bottom: 24px;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  border-radius: 3px;
+  transition: width .3s;
+}
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+.progress-text .timer { color: #f87171; font-weight: 600; }
+
+/* Question card */
+.question-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.question-num {
+  font-size: 0.75rem;
+  color: #f59e0b;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.question-text {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+.question-image {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border: 1px solid #334155;
+}
+
+/* Option buttons */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  text-align: left;
+  color: #e2e8f0;
+}
+.option:hover { border-color: #f59e0b; background: #1e293b; }
+.option.selected { border-color: #f59e0b; background: #f59e0b15; }
+.option.correct { border-color: #22c55e; background: #22c55e15; }
+.option.wrong { border-color: #ef4444; background: #ef444415; }
+.option .letter {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: #334155;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.option.correct .letter { background: #22c55e; color: #0f172a; }
+.option.wrong .letter { background: #ef4444; color: white; }
+
+/* Feedback */
+.feedback {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: none;
+}
+.feedback.show { display: block; }
+.feedback.correct { background: #22c55e15; border: 1px solid #22c55e40; color: #86efac; }
+.feedback.wrong { background: #ef444415; border: 1px solid #ef444440; color: #fca5a5; }
+
+/* Navigation */
+.nav-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 20px; }
+
+/* Results screen */
+.results { text-align: center; padding: 20px 0; }
+.result-card {
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 20px;
+}
+.score-circle {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  border: 8px solid #334155;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.score-circle .score-num { font-size: 2.4rem; font-weight: 800; }
+.score-circle .score-label { font-size: 0.75rem; color: #94a3b8; }
+.score-circle.pass { border-color: #22c55e; }
+.score-circle.pass .score-num { color: #22c55e; }
+.score-circle.fail { border-color: #ef4444; }
+.score-circle.fail .score-num { color: #ef4444; }
+
+.result-stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+.stat { background: #0f172a; border-radius: 10px; padding: 14px 20px; min-width: 80px; }
+.stat .val { font-size: 1.4rem; font-weight: 700; }
+.stat .lbl { font-size: 0.7rem; color: #94a3b8; }
+.stat .val.green { color: #22c55e; }
+.stat .val.red { color: #ef4444; }
+
+/* Review */
+.review-item {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+.review-item .q { font-size: 0.9rem; margin-bottom: 8px; }
+.review-item .a { font-size: 0.8rem; color: #94a3b8; }
+.review-item .your { display: inline-block; padding: 2px 10px; border-radius: 5px; font-size: 0.78rem; margin-left: 8px; }
+.review-item .your.ok { background: #22c55e30; color: #86efac; }
+.review-item .your.ko { background: #ef444430; color: #fca5a5; }
+
+footer { padding: 16px; font-size: 0.7rem; color: #475569; text-align: center; }
+
+.hidden { display: none !important; }
+
+@media (max-width: 500px) {
+  .container { padding: 12px; }
+  .question-card { padding: 16px; }
+  .question-text { font-size: 0.95rem; }
+  .option { padding: 12px 14px; font-size: 0.88rem; }
+  .info-cards { gap: 8px; }
+  .info-card { padding: 12px 14px; min-width: 90px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🚗 Test Permiso B</h1>
+  <p>Simulacro de examen DGT — Actualizado 2026</p>
+</header>
+
+<div class="container" id="app"></div>
+
+<footer>Preguntas basadas en el temario oficial de la DGT. Solo para práctica.</footer>
+
+<script>
+// ═══════════════════ QUESTION BANK ═══════════════════
+const questionBank = [
+  // SEÑALES
+  {
+    q: "Una señal triangular con borde rojo y fondo blanco indica:",
+    opts: ["Prohibición", "Peligro", "Obligación"],
+    correct: 1,
+    topic: "Señales",
+    explanation: "Las señales triangulares con borde rojo son de peligro o advertencia. Las redondas con borde rojo son de prohibición, y las redondas azules de obligación."
+  },
+  {
+    q: "Una señal redonda con borde rojo y fondo blanco indica:",
+    opts: ["Peligro", "Obligación", "Prohibición"],
+    correct: 2,
+    topic: "Señales",
+    explanation: "Las señales circulares con borde rojo indican prohibición. Ejemplo: velocidad máxima, adelantamiento prohibido."
+  },
+  {
+    q: "¿Qué indica una señal cuadrada azul con una 'P' blanca?",
+    opts: ["Prohibido aparcar", "Zona de estacionamiento", "Paso a nivel"],
+    correct: 1,
+    topic: "Señales",
+    explanation: "La señal azul cuadrada con una P blanca indica zona de estacionamiento o aparcamiento permitido."
+  },
+  {
+    q: "Un semáforo con luz roja fija obliga a:",
+    opts: ["Ceder el paso", "Detenerse", "Reducir la velocidad"],
+    correct: 1,
+    topic: "Señales",
+    explanation: "La luz roja fija obliga a detenerse. La luz amarilla fija indica precaución, y la amarilla intermitente permite pasar con precaución."
+  },
+  {
+    q: "¿Qué indica una marca vial continua en el centro de la calzada?",
+    opts: ["Se puede adelantar con precaución", "Prohíbe adelantar", "Solo pueden adelantar motos"],
+    correct: 1,
+    topic: "Señales",
+    explanation: "Una línea continua prohíbe adelantar y circular sobre ella. Solo se puede rebasar si es discontinua por tu lado."
+  },
+  {
+    q: "Una señal de STOP obliga a:",
+    opts: ["Ceder el paso sin detenerse si no vienen coches", "Detenerse siempre, aunque no venga nadie", "Reducir a 20 km/h"],
+    correct: 1,
+    topic: "Señales",
+    explanation: "El STOP obliga a detenerse siempre, incluso si no hay tráfico. Es diferente a 'Ceda el paso', que solo obliga a ceder."
+  },
+  {
+    q: "¿Qué indica una señal de 'Ceda el Paso'?",
+    opts: ["Detenerse obligatoriamente", "Ceder el paso a los vehículos de la vía principal", "Prohibido el paso"],
+    correct: 1,
+    topic: "Señales",
+    explanation: "Ceda el paso obliga a ceder prioridad a los vehículos que circulan por la vía principal, deteniéndose solo si es necesario."
+  },
+
+  // VELOCIDAD
+  {
+    q: "¿Cuál es la velocidad máxima en autopista para un turismo?",
+    opts: ["100 km/h", "120 km/h", "130 km/h"],
+    correct: 1,
+    topic: "Velocidad",
+    explanation: "La velocidad máxima en autopista y autovía para turismos y motos es de 120 km/h."
+  },
+  {
+    q: "¿Cuál es la velocidad máxima en carretera convencional para un turismo?",
+    opts: ["80 km/h", "90 km/h", "100 km/h"],
+    correct: 1,
+    topic: "Velocidad",
+    explanation: "En carreteras convencionales (sin separación física), la velocidad máxima para turismos es de 90 km/h."
+  },
+  {
+    q: "¿Velocidad máxima en vías urbanas con un solo carril por sentido?",
+    opts: ["30 km/h", "40 km/h", "50 km/h"],
+    correct: 2,
+    topic: "Velocidad",
+    explanation: "En vías urbanas con un solo carril por sentido, el límite es 50 km/h. Con plataforma única: 20 km/h; dos o más carriles: 50 km/h."
+  },
+  {
+    q: "¿A qué velocidad máxima puede circular un turismo en una travesía?",
+    opts: ["30 km/h", "50 km/h", "90 km/h"],
+    correct: 1,
+    topic: "Velocidad",
+    explanation: "Las travesías son tramos de carretera que discurren por poblado. El límite general es 50 km/h, salvo señalización específica."
+  },
+  {
+    q: "La velocidad mínima en autopista es de:",
+    opts: ["40 km/h", "60 km/h", "80 km/h"],
+    correct: 1,
+    topic: "Velocidad",
+    explanation: "La velocidad mínima en autopistas y autovías es de 60 km/h, salvo circunstancias excepcionales (atasco, meteorología adversa)."
+  },
+
+  // ALCOHOL Y DROGAS
+  {
+    q: "Tasa máxima de alcohol en sangre para conductores noveles:",
+    opts: ["0,30 g/l", "0,50 g/l", "0,15 g/l"],
+    correct: 2,
+    topic: "Alcohol",
+    explanation: "Para conductores noveles (menos de 2 años de permiso) y profesionales, la tasa máxima es 0,15 g/l en sangre (0,15 mg/l en aire). Para conductores generales es 0,25 mg/l en aire espirado."
+  },
+  {
+    q: "Tasa máxima de alcohol en aire espirado para conductores generales:",
+    opts: ["0,15 mg/l", "0,25 mg/l", "0,50 mg/l"],
+    correct: 1,
+    topic: "Alcohol",
+    explanation: "La tasa máxima de alcohol en aire espirado es 0,25 mg/l para conductores generales. Equivale a 0,5 g/l en sangre."
+  },
+  {
+    q: "Negarse a la prueba de alcoholemia es:",
+    opts: ["Una falta leve", "Un delito", "No tiene consecuencias"],
+    correct: 1,
+    topic: "Alcohol",
+    explanation: "Negarse a realizar la prueba de alcoholemia constituye un delito de desobediencia, penado con prisión de 6 meses a 1 año y privación del permiso de 1 a 4 años."
+  },
+  {
+    q: "¿Puede un agente realizar una prueba de drogas en un control?",
+    opts: ["No, necesita orden judicial", "Sí, en cualquier control preventivo", "Solo si hay accidente"],
+    correct: 1,
+    topic: "Alcohol",
+    explanation: "Los agentes pueden realizar pruebas de detección de drogas en cualquier control preventivo sin necesidad de indicios previos ni orden judicial."
+  },
+
+  // PRIORIDAD
+  {
+    q: "En una intersección sin señalizar, ¿quién tiene prioridad?",
+    opts: ["El que llega primero", "El vehículo que viene por la derecha", "El vehículo más grande"],
+    correct: 1,
+    topic: "Prioridad",
+    explanation: "En intersecciones sin señalizar, la norma general es prioridad al vehículo que se aproxima por la derecha."
+  },
+  {
+    q: "En un estrechamiento sin señalizar, ¿quién pasa primero?",
+    opts: ["El más rápido", "El que llegó primero", "El vehículo que tenga que dar marcha atrás más distancia"],
+    correct: 1,
+    topic: "Prioridad",
+    explanation: "En un estrechamiento, tiene prioridad el vehículo que haya entrado primero. Si no está claro, cede el que tenga que recorrer más distancia marcha atrás."
+  },
+  {
+    q: "Al incorporarse a una autovía desde el carril de aceleración:",
+    opts: ["Tienes prioridad sobre los que ya circulan", "Debes ceder el paso a los que ya circulan", "Tienes prioridad si pones el intermitente"],
+    correct: 1,
+    topic: "Prioridad",
+    explanation: "Al incorporarse a una vía principal, siempre debes ceder el paso a los vehículos que ya circulan por ella."
+  },
+
+  // ADELANTAMIENTO
+  {
+    q: "¿Está permitido adelantar en un cambio de rasante sin visibilidad?",
+    opts: ["Sí, si no viene nadie de frente", "No, está prohibido", "Solo a motos"],
+    correct: 1,
+    topic: "Adelantamiento",
+    explanation: "Está prohibido adelantar en cambios de rasante y curvas sin visibilidad, así como en pasos a nivel y túneles de un solo carril."
+  },
+  {
+    q: "Al adelantar a un ciclista fuera de poblado, ¿qué distancia lateral mínima debes dejar?",
+    opts: ["1 metro", "1,5 metros", "2 metros"],
+    correct: 1,
+    topic: "Adelantamiento",
+    explanation: "Al adelantar a ciclistas o ciclomotores fuera de poblado, debes dejar al menos 1,5 metros de separación lateral."
+  },
+  {
+    q: "¿Se puede adelantar por la derecha en autopista?",
+    opts: ["Sí, siempre", "No, nunca", "Solo si el tráfico está detenido en el carril izquierdo"],
+    correct: 2,
+    topic: "Adelantamiento",
+    explanation: "Se puede adelantar por la derecha solo en situaciones excepcionales: cuando el vehículo de delante va a girar a la izquierda, o en vías con tráfico denso si los carriles de la derecha avanzan más rápido."
+  },
+  {
+    q: "En un túnel con un carril por sentido, ¿puedes adelantar?",
+    opts: ["Sí, si hay visibilidad", "No, está prohibido", "Solo si no hay línea continua"],
+    correct: 1,
+    topic: "Adelantamiento",
+    explanation: "En túneles con un solo carril por sentido está prohibido adelantar. En túneles con más carriles, se aplican las normas generales."
+  },
+
+  // LUCES
+  {
+    q: "¿Cuándo es obligatorio usar el alumbrado de cruce (cortas)?",
+    opts: ["Solo de noche", "Entre la puesta y salida del sol y en túneles", "Solo cuando llueve"],
+    correct: 1,
+    topic: "Luces",
+    explanation: "El alumbrado de cruce es obligatorio desde la puesta hasta la salida del sol, en túneles, carriles reversibles y cuando haya condiciones meteorológicas adversas."
+  },
+  {
+    q: "¿Cuándo se puede usar la luz antiniebla trasera?",
+    opts: ["Siempre que haya niebla", "Solo con niebla densa o lluvia muy intensa", "Siempre de noche"],
+    correct: 1,
+    topic: "Luces",
+    explanation: "La luz antiniebla trasera solo debe usarse con niebla densa, lluvia muy intensa, nieve o polvo que reduzca drásticamente la visibilidad. Su uso indebido deslumbra a otros conductores."
+  },
+  {
+    q: "La luz de largo alcance (largas):",
+    opts: ["Se puede usar siempre en autopista", "No puede usarse en poblado", "Es obligatoria en carretera"],
+    correct: 1,
+    topic: "Luces",
+    explanation: "Las luces de largo alcance no pueden usarse en poblado. Tampoco cuando puedas deslumbrar a otros conductores (vehículos cercanos, cruces con peatones o ciclistas)."
+  },
+
+  // SEGURIDAD
+  {
+    q: "¿A qué distancia mínima debes colocar los triángulos de emergencia en autopista?",
+    opts: ["25 metros", "50 metros", "100 metros"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "En autopista o autovía, los triángulos deben colocarse al menos a 50 metros. Muchos conductores usan ya la luz V-16 en lugar de triángulos."
+  },
+  {
+    q: "¿Es obligatorio el chaleco reflectante al salir del vehículo en carretera?",
+    opts: ["Solo de noche", "Sí, siempre en vías interurbanas", "Solo si hay accidente"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "El chaleco reflectante de alta visibilidad es obligatorio al salir del vehículo y ocupar la calzada en vías interurbanas (fuera de poblado)."
+  },
+  {
+    q: "ITV: un turismo nuevo debe pasar la primera inspección a los:",
+    opts: ["2 años", "4 años", "5 años"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "Los turismos nuevos pasan la primera ITV a los 4 años. Luego cada 2 años hasta los 10 años, y después anualmente."
+  },
+  {
+    q: "¿Cuándo caduca el permiso de conducir clase B?",
+    opts: ["Cada 5 años hasta los 65, luego cada 5", "Cada 10 años hasta los 65, luego cada 5", "Cada 15 años"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "El permiso B se renueva cada 10 años hasta los 65 años. A partir de los 65, cada 5 años."
+  },
+  {
+    q: "La distancia de detención depende principalmente de:",
+    opts: ["Solo de los frenos", "Velocidad, tiempo de reacción y adherencia", "Solo del estado del conductor"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "La distancia de detención = distancia de reacción + distancia de frenado. Depende de la velocidad (al cuadrado), tiempo de reacción (~1s), y coeficiente de adherencia de la carretera."
+  },
+  {
+    q: "Con lluvia, la distancia de frenado:",
+    opts: ["Se mantiene igual", "Se reduce a la mitad", "Se duplica aproximadamente"],
+    correct: 2,
+    topic: "Seguridad",
+    explanation: "Con pavimento mojado, el coeficiente de adherencia baja y la distancia de frenado puede duplicarse. Aumenta la distancia de seguridad y reduce la velocidad."
+  },
+
+  // DOCUMENTACIÓN
+  {
+    q: "¿Qué documentos debes llevar siempre al conducir?",
+    opts: ["Solo el DNI", "Permiso de conducir, permiso de circulación y tarjeta ITV", "Solo el seguro"],
+    correct: 1,
+    topic: "Documentación",
+    explanation: "Obligatorio llevar: permiso de conducir vigente, permiso de circulación del vehículo y tarjeta ITV con la inspección en vigor. El seguro no es obligatorio portarlo físicamente."
+  },
+  {
+    q: "El seguro obligatorio del coche cubre:",
+    opts: ["Daños propios", "Responsabilidad civil frente a terceros", "Robo del vehículo"],
+    correct: 1,
+    topic: "Documentación",
+    explanation: "El seguro obligatorio cubre la responsabilidad civil frente a terceros (daños a personas y bienes de otros). Los daños propios requieren seguro a todo riesgo."
+  },
+
+  // MISC
+  {
+    q: "¿Cuál es la distancia de seguridad recomendada en carretera?",
+    opts: ["50 metros", "2 segundos de separación", "10 metros"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "Se recomienda mantener al menos 2 segundos de separación con el vehículo delantero en condiciones normales. Con lluvia: 4 segundos o más."
+  },
+  {
+    q: "Usar el móvil sujeto con la mano mientras conduces:",
+    opts: ["Implica multa de 200€ y 6 puntos", "Es legal si es breve", "Solo está prohibido en ciudad"],
+    correct: 0,
+    topic: "Seguridad",
+    explanation: "Usar el móvil con la mano conlleva multa de 200€ y pérdida de 6 puntos. Incluso sujetarlo sin usarlo se sanciona. Solo se permite con manos libres integrados."
+  },
+  {
+    q: "¿Puedes conducir con auriculares puestos?",
+    opts: ["Sí, con volumen bajo", "No, está prohibido", "Solo en autopista"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "Está prohibido conducir con auriculares conectados a aparatos de sonido. Reducen la capacidad auditiva y la atención."
+  },
+  {
+    q: "Si un agente te da una orden que contradice un semáforo:",
+    opts: ["Obedezco al semáforo", "Obedezco al agente", "Espero a que se pongan de acuerdo"],
+    correct: 1,
+    topic: "Prioridad",
+    explanation: "Las órdenes de los agentes prevalecen sobre cualquier otra señal. El orden de prioridad es: 1º Agentes, 2º Señalización circunstancial, 3º Semáforos, 4º Señales verticales, 5º Marcas viales."
+  },
+
+  // CARGA Y PASAJEROS
+  {
+    q: "La carga en un turismo puede sobresalir por detrás como máximo:",
+    opts: ["5% de la longitud", "10% de la longitud", "15% de la longitud"],
+    correct: 1,
+    topic: "Carga",
+    explanation: "La carga puede sobresalir hasta un 10% de la longitud del vehículo por detrás (15% si es indivisible). Debe señalizarse con el panel V-20."
+  },
+  {
+    q: "¿Pueden viajar niños menores de 12 años en el asiento delantero?",
+    opts: ["Nunca", "Sí, con sistema de retención adecuado a su talla", "Solo en trayectos cortos"],
+    correct: 1,
+    topic: "Carga",
+    explanation: "Los menores de 12 años pueden viajar en el asiento delantero siempre que usen un sistema de retención homologado adecuado a su talla y peso."
+  },
+  {
+    q: "Los sistemas de retención infantil deben usarse hasta que el niño mida:",
+    opts: ["1,25 metros", "1,35 metros", "1,50 metros"],
+    correct: 1,
+    topic: "Carga",
+    explanation: "Es obligatorio el uso de sistemas de retención infantil para menores con estatura inferior a 1,35 metros. Recomendado hasta 1,50 metros."
+  },
+
+  // NEUMÁTICOS
+  {
+    q: "La profundidad mínima legal del dibujo de los neumáticos es:",
+    opts: ["1,0 mm", "1,6 mm", "2,0 mm"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "La profundidad mínima legal del dibujo es de 1,6 mm en las ranuras principales. Se recomienda cambiar a los 3 mm para mantener buena adherencia en mojado."
+  },
+
+  // ACCIDENTES
+  {
+    q: "En caso de accidente, ¿estás obligado a auxiliar a los heridos?",
+    opts: ["Solo si eres el causante", "Sí, es obligatorio para todo conductor implicado o testigo", "Solo si hay peligro de muerte"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "Todo conductor o usuario de la vía implicado o testigo de un accidente está obligado a auxiliar a las víctimas dentro de sus posibilidades. La omisión del deber de socorro es delito."
+  },
+  {
+    q: "Protocolo PAS en accidentes significa:",
+    opts: ["Parar, Avisar, Socorrer", "Proteger, Avisar, Socorrer", "Prevenir, Auxiliar, Salir"],
+    correct: 1,
+    topic: "Seguridad",
+    explanation: "PAS = Proteger (la zona para evitar más accidentes), Avisar (112), Socorrer (a los heridos, sin moverlos salvo peligro inminente)."
+  }
+];
+
+// ═══════════════ APP STATE ═══════════════
+const TOTAL_QUESTIONS = 30; // DGT test: 30 questions
+let questions = [];
+let currentIndex = 0;
+let answers = []; // { selected: int|null, time: int }
+let startTime = 0;
+let questionStartTime = 0;
+let timerInterval = null;
+
+// ═══════════════ HELPERS ═══════════════
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// ═══════════════ RENDER ═══════════════
+function showStartScreen() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <div class="start-screen">
+      <h2>🎯 Simulacro de Examen</h2>
+      <p>30 preguntas tipo test. Máximo 30 minutos.<br>3 errores permitidos. ¿Preparado?</p>
+      <div class="info-cards">
+        <div class="info-card"><div class="num">30</div><div class="label">Preguntas</div></div>
+        <div class="info-card"><div class="num">30'</div><div class="label">Tiempo</div></div>
+        <div class="info-card"><div class="num">3</div><div class="label">Fallos máx.</div></div>
+        <div class="info-card"><div class="num">${questionBank.length}</div><div class="label">En el banco</div></div>
+      </div>
+      <button class="btn" onclick="startTest()">▶ Comenzar Test</button>
+    </div>
+  `;
+}
+
+function startTest() {
+  questions = shuffle(questionBank).slice(0, TOTAL_QUESTIONS);
+  currentIndex = 0;
+  answers = questions.map(() => ({ selected: null, time: 0 }));
+  startTime = Date.now();
+  questionStartTime = Date.now();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimer, 1000);
+  renderQuestion();
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const timerEl = document.getElementById('globalTimer');
+  if (timerEl) timerEl.textContent = formatTime(elapsed);
+}
+
+function nextQuestion() {
+  const q = questions[currentIndex];
+  const a = answers[currentIndex];
+  if (!a.selected && a.selected !== 0) return; // must answer
+  
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    questionStartTime = Date.now();
+    renderQuestion();
+  } else {
+    clearInterval(timerInterval);
+    showResults();
+  }
+}
+
+function prevQuestion() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    questionStartTime = Date.now();
+    renderQuestion();
+  }
+}
+
+function selectAnswer(optIndex) {
+  const a = answers[currentIndex];
+  if (a.selected !== null) return; // already answered
+  
+  a.selected = optIndex;
+  a.time = Math.floor((Date.now() - questionStartTime) / 1000);
+  
+  renderFeedback();
+}
+
+function renderQuestion() {
+  const q = questions[currentIndex];
+  const a = answers[currentIndex];
+  const answered = a.selected !== null;
+  const percent = ((currentIndex + (answered ? 1 : 0)) / questions.length * 100);
+  
+  const app = document.getElementById('app');
+  const letters = ['A', 'B', 'C'];
+  
+  app.innerHTML = `
+    <div class="progress-text">
+      <span>Pregunta ${currentIndex + 1}/${questions.length}</span>
+      <span class="timer" id="globalTimer">${formatTime(Math.floor((Date.now() - startTime) / 1000))}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
+    
+    <div class="question-card">
+      <div class="question-num">${q.topic} · Pregunta ${currentIndex + 1}</div>
+      <div class="question-text">${q.q}</div>
+      <div class="options" id="optionsContainer">
+        ${q.opts.map((opt, i) => `
+          <button class="option ${a.selected === i ? (i === q.correct ? 'correct' : 'wrong') : ''} ${a.selected === null ? '' : (i === q.correct ? 'correct' : '')}"
+                  onclick="selectAnswer(${i})"
+                  ${answered ? 'disabled' : ''}>
+            <span class="letter">${letters[i]}</span>
+            <span>${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback ${answered ? 'show' : ''} ${a.selected === q.correct ? 'correct' : 'wrong'}" id="feedback">
+        ${answered ? (a.selected === q.correct ? '✅ ¡Correcto! ' : '❌ Incorrecto. ') + q.explanation : ''}
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      ${currentIndex > 0 ? `<button class="btn btn-outline" onclick="prevQuestion()">← Anterior</button>` : ''}
+      ${answered ? `<button class="btn" onclick="nextQuestion()">${currentIndex < questions.length - 1 ? 'Siguiente →' : 'Ver Resultados 📊'}</button>` : ''}
+    </div>
+  `;
+}
+
+function renderFeedback() {
+  // Just re-render with feedback shown
+  const q = questions[currentIndex];
+  const a = answers[currentIndex];
+  const app = document.getElementById('app');
+  
+  // Update options visually
+  const opts = app.querySelectorAll('.option');
+  const letters = ['A', 'B', 'C'];
+  opts.forEach((el, i) => {
+    el.disabled = true;
+    el.classList.remove('selected', 'correct', 'wrong');
+    if (i === a.selected) el.classList.add(i === q.correct ? 'correct' : 'wrong');
+    if (i === q.correct && a.selected !== q.correct) el.classList.add('correct');
+  });
+  
+  // Show feedback
+  const fb = document.getElementById('feedback');
+  fb.classList.add('show');
+  fb.classList.add(a.selected === q.correct ? 'correct' : 'wrong');
+  fb.textContent = (a.selected === q.correct ? '✅ ¡Correcto! ' : '❌ Incorrecto. ') + q.explanation;
+  
+  // Update nav buttons
+  const nav = app.querySelector('.nav-buttons');
+  nav.innerHTML = `
+    ${currentIndex > 0 ? `<button class="btn btn-outline" onclick="prevQuestion()">← Anterior</button>` : ''}
+    <button class="btn" onclick="nextQuestion()">${currentIndex < questions.length - 1 ? 'Siguiente →' : 'Ver Resultados 📊'}</button>
+  `;
+}
+
+function showResults() {
+  const correct = answers.filter((a, i) => a.selected === questions[i].correct).length;
+  const wrong = answers.length - correct;
+  const totalTime = Math.floor((Date.now() - startTime) / 1000);
+  const passed = wrong <= 3;
+  const app = document.getElementById('app');
+  
+  app.innerHTML = `
+    <div class="results">
+      <div class="result-card">
+        <div class="score-circle ${passed ? 'pass' : 'fail'}">
+          <div class="score-num">${Math.round(correct / questions.length * 100)}%</div>
+          <div class="score-label">${correct}/${questions.length}</div>
+        </div>
+        <h2>${passed ? '🎉 ¡APTO!' : '📚 No Apto'}</h2>
+        <p style="color:#94a3b8;margin-top:8px;">${passed ? 'Has superado el simulacro. ¡Enhorabuena!' : `Has tenido ${wrong} fallos. El máximo permitido es 3. ¡Sigue practicando!`}</p>
+        <p style="color:#64748b;margin-top:4px;">Tiempo total: ${formatTime(totalTime)}</p>
+      </div>
+      
+      <div class="result-stats">
+        <div class="stat"><div class="val green">${correct}</div><div class="lbl">Aciertos</div></div>
+        <div class="stat"><div class="val red">${wrong}</div><div class="lbl">Fallos</div></div>
+        <div class="stat"><div class="val" style="color:#f59e0b">${formatTime(totalTime)}</div><div class="lbl">Tiempo</div></div>
+        <div class="stat"><div class="val" style="color:#60a5fa">${Math.round(totalTime / questions.length)}s</div><div class="lbl">Media/preg.</div></div>
+      </div>
+
+      <div style="margin: 20px 0;">
+        <button class="btn" onclick="startTest()">🔄 Nuevo Test</button>
+        <button class="btn btn-outline" onclick="showStartScreen()" style="margin-left:8px;">🏠 Inicio</button>
+      </div>
+      
+      <h3 style="text-align:left;margin-top:24px;margin-bottom:12px;">📋 Revisión</h3>
+      ${questions.map((q, i) => {
+        const a = answers[i];
+        const ok = a.selected === q.correct;
+        return `
+          <div class="review-item">
+            <div class="q">${i + 1}. ${q.q} <span class="your ${ok ? 'ok' : 'ko'}">${ok ? '✓' : '✗'}</span></div>
+            <div class="a">
+              Tu respuesta: ${a.selected !== null ? q.opts[a.selected] : 'Sin contestar'}<br>
+              Correcta: ${q.opts[q.correct]}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ═══════════════ INIT ═══════════════
+showStartScreen();
+</script>
+</body>
+</html>
